@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Sign up{% endblock %}
+
+{% block content %}
+  <div class="max-w-md mx-auto px-4 py-12">
+
+    <h1 class="font-display text-3xl font-extrabold">Create your account</h1>
+
+    <!-- Google sign-up -->
+    <form method="post" action="{{ url_for('google_demo') }}" class="mt-5">
+      <input type="hidden" name="_csrf" value="{{ csrf }}">
+      <button class="w-full bg-white border-2 border-ink/15 rounded-full py-3 font-semibold hover:border-moss">
+        <i class="fa-brands fa-google text-[#4285F4] mr-2"></i>Continue with Google
+      </button>
+    </form>
+
+    <!-- Email sign-up -->
+    <form method="post" enctype="multipart/form-data" class="mt-5 bg-white border border-ink/10 rounded-2xl p-5 space-y-3 text-sm">
+      <input type="hidden" name="_csrf" value="{{ csrf }}">
+
+      {% for n,l,t in [('name','Full name','text'),('email','Email','email'),('phone','Mobile number (10 digits)','tel'),('city','City','text'),('password','Password (8+ characters)','password'),('confirm','Confirm password','password')] %}
+        <input name="{{ n }}" type="{{ t }}" placeholder="{{ l }}" aria-label="{{ l }}" required class="w-full border rounded-lg px-3 py-2">
+      {% endfor %}
+
+      <label class="block">Profile photo (optional)
+        <input type="file" name="photo" accept="image/*" class="block mt-1">
+      </label>
+
+      <label class="flex gap-2">
+        <input type="checkbox" name="terms"> I agree to the Terms & Conditions
+      </label>
+
+      <button class="w-full bg-moss text-white rounded-full py-2.5 font-semibold hover:bg-ink">Create account</button>
+    </form>
+
+  </div>
+{% endblock %}

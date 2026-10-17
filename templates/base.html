@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{% block title %}Home{% endblock %} · EcoConnect</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink: '#14261C',
+            moss: '#2F5D3A',
+            leaf: '#B7E36B',
+            paper: '#FAFAF6',
+            mint: '#E8F1E4',
+            clay: '#B5602B',
+            sky: '#2B6C8F'
+          },
+          fontFamily: {
+            display: ['Bricolage Grotesque', 'sans-serif'],
+            sans: ['Public Sans', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    :focus-visible {
+      outline: 2px solid #2F5D3A;
+      outline-offset: 2px
+    }
+
+    @media (prefers-reduced-motion:reduce) {
+      * {
+        animation: none !important;
+        transition: none !important
+      }
+    }
+  </style>
+  {% block head %}{% endblock %}
+</head>
+
+<body class="bg-paper text-ink font-sans antialiased min-h-screen flex flex-col">
+
+  <header class="bg-white border-b border-ink/10 sticky top-0 z-30">
+    <nav class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center gap-x-6 gap-y-2">
+
+      <a href="{{ url_for('home') }}" class="font-display font-extrabold text-2xl text-moss">EcoConnect</a>
+
+      <div class="flex gap-5 text-sm font-medium order-3 sm:order-none w-full sm:w-auto">
+        <a href="{{ url_for('market') }}" class="hover:text-moss">Marketplace</a>
+        <a href="{{ url_for('recycle') }}" class="hover:text-moss">Recycle</a>
+        <a href="{{ url_for('centers') }}" class="hover:text-moss">Collection centers</a>
+      </div>
+
+      <div class="ml-auto flex items-center gap-3 text-sm">
+        {% if user %}
+          <a href="{{ url_for('post') }}" class="bg-moss text-white rounded-full px-4 py-2 font-semibold hover:bg-ink">Post an item</a>
+
+          <a href="{{ url_for('notifications') }}" class="relative px-1" aria-label="Notifications">
+            <i class="fa-regular fa-bell text-lg"></i>
+            {% if unread %}
+              <span class="absolute -top-2 -right-2 bg-clay text-white text-[10px] rounded-full px-1.5">{{ unread }}</span>
+            {% endif %}
+          </a>
+
+          <details class="relative">
+            <summary class="cursor-pointer list-none font-medium">Hi, {{ user.name.split()[0] }} 👋</summary>
+            <div class="absolute right-0 mt-2 w-48 bg-white border border-ink/10 rounded-xl shadow-lg p-2 flex flex-col">
+              <a class="px-3 py-2 rounded hover:bg-mint" href="{{ url_for('dashboard') }}">My listings & requests</a>
+              <a class="px-3 py-2 rounded hover:bg-mint" href="{{ url_for('dashboard') }}#favorites">Favorites</a>
+              <a class="px-3 py-2 rounded hover:bg-mint" href="{{ url_for('notifications') }}">Notifications</a>
+              <form method="post" action="{{ url_for('logout') }}">
+                <input type="hidden" name="_csrf" value="{{ csrf }}">
+                <button class="w-full text-left px-3 py-2 rounded hover:bg-mint">Log out</button>
+              </form>
+            </div>
+          </details>
+        {% else %}
+          <a href="{{ url_for('login') }}" class="font-medium hover:text-moss">Log in</a>
+          <a href="{{ url_for('signup') }}" class="bg-moss text-white rounded-full px-4 py-2 font-semibold hover:bg-ink">Sign up</a>
+        {% endif %}
+      </div>
+
+    </nav>
+  </header>
+
+  {% with msgs = get_flashed_messages(with_categories=true) %}
+    {% for c, m in msgs %}
+      <div class="max-w-6xl mx-auto w-full px-4 mt-4">
+        <div class="rounded-xl px-4 py-3 text-sm font-medium {{ 'bg-red-50 text-red-800' if c=='error' else 'bg-mint text-moss' }}" role="status">{{ m }}</div>
+      </div>
+    {% endfor %}
+  {% endwith %}
+
+  <main class="flex-1">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="bg-ink text-white/80 mt-16">
+    <div class="max-w-6xl mx-auto px-4 py-10 grid gap-6 sm:grid-cols-3 text-sm">
+
+      <div>
+        <p class="font-display text-xl text-white font-extrabold">EcoConnect</p>
+        <p>Reuse Before You Recycle.</p>
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <a href="{{ url_for('market') }}">Marketplace</a>
+        <a href="{{ url_for('recycle') }}">Recycle</a>
+        <a href="{{ url_for('centers') }}">Collection centers</a>
+      </div>
+
+      <div>
+        <p class="text-white font-semibold">Our mission</p>
+        <p>Give every device a second life. Reuse first, recycle responsibly.</p>
+      </div>
+
+    </div>
+  </footer>
+
+</body>
+
+</html>

@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Post an item{% endblock %}
+
+{% block content %}
+  <div class="max-w-2xl mx-auto px-4 py-10">
+
+    <h1 class="font-display text-3xl font-extrabold">Post an item</h1>
+
+    <form method="post" enctype="multipart/form-data" class="mt-6 bg-white border border-ink/10 rounded-2xl p-6 grid sm:grid-cols-2 gap-4 text-sm">
+      <input type="hidden" name="_csrf" value="{{ csrf }}">
+
+      <!-- Listing type -->
+      <fieldset class="sm:col-span-2">
+        <legend class="font-semibold mb-2">What do you want to do with this product?</legend>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          {% for v,l in [('sell','💰 Sell'),('donate','🎁 Donate'),('exchange','🔄 Exchange'),('recycle','♻️ Recycle')] %}
+            <label class="border rounded-xl p-3 text-center cursor-pointer has-[:checked]:bg-leaf has-[:checked]:border-moss">
+              <input type="radio" name="listing_type" value="{{ v }}" class="sr-only" {{ 'checked' if v=='sell' }}>{{ l }}
+            </label>
+          {% endfor %}
+        </div>
+        <p class="text-xs text-ink/60 mt-1">Recycle takes you to the pickup form.</p>
+      </fieldset>
+
+      <!-- Product details -->
+      <input name="title" required placeholder="Product name" aria-label="Product name" class="sm:col-span-2 border rounded-lg px-3 py-2">
+
+      <select name="category" aria-label="Category" class="border rounded-lg px-3 py-2">
+        {% for c,i in CATS %}
+          <option>{{ c }}</option>
+        {% endfor %}
+      </select>
+
+      <select name="condition" aria-label="Condition" class="border rounded-lg px-3 py-2">
+        {% for c in CONDITIONS %}
+          <option>{{ c }}</option>
+        {% endfor %}
+      </select>
+
+      <input name="brand" placeholder="Brand" aria-label="Brand" class="border rounded-lg px-3 py-2">
+      <input name="model" placeholder="Model" aria-label="Model" class="border rounded-lg px-3 py-2">
+
+      <input name="age" placeholder="Product age (e.g. 2 years)" aria-label="Age" class="border rounded-lg px-3 py-2">
+      <input name="location" placeholder="City / area" aria-label="Location" class="border rounded-lg px-3 py-2">
+
+      <input name="price" inputmode="numeric" placeholder="Price ₹ (for Sell)" aria-label="Price" class="border rounded-lg px-3 py-2">
+      <input name="exchange_for" placeholder="What would you like in exchange?" aria-label="Exchange for" class="border rounded-lg px-3 py-2">
+
+      <textarea name="description" rows="4" placeholder="Describe the item honestly, including any faults" class="sm:col-span-2 border rounded-lg px-3 py-2"></textarea>
+
+      <label class="sm:col-span-2">Photo
+        <input type="file" name="photo" accept="image/*" class="block mt-1">
+      </label>
+
+      <p class="sm:col-span-2 bg-mint rounded-xl p-3">Please make sure the product description is accurate and remove your personal data from electronic devices before handing them over.</p>
+
+      <button class="sm:col-span-2 bg-moss text-white rounded-full py-3 font-semibold hover:bg-ink">Publish listing</button>
+    </form>
+
+  </div>
+{% endblock %}

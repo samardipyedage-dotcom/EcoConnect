@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin Login · EcoConnect</title>
+
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #f1f5f2;
+      display: flex;
+      min-height: 100vh;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
+    }
+
+    .box {
+      background: #fff;
+      padding: 32px;
+      border-radius: 12px;
+      width: 320px;
+      box-shadow: 0 2px 12px #0001;
+    }
+
+    h2 {
+      margin-top: 0;
+      color: #1f6f43;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 6px 0 14px;
+      box-sizing: border-box;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background: #1f6f43;
+      color: #fff;
+      border: 0;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    /* Error message */
+    .err {
+      background: #fde8e8;
+      color: #9b1c1c;
+      padding: 8px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <form class="box" method="post">
+
+    <h2>Admin login</h2>
+
+    {# ---------- Flash messages ---------- #}
+    {% for cat, msg in get_flashed_messages(with_categories=true) %}
+      <div class="err">{{ msg }}</div>
+    {% endfor %}
+
+    <input type="hidden" name="_csrf" value="{{ csrf }}">
+
+    <label>Email</label>
+    <input type="email" name="email" required>
+
+    <label>Password</label>
+    <input type="password" name="password" required>
+
+    <button>Sign in</button>
+
+  </form>
+
+</body>
+</html>

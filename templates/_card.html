@@ -1,0 +1,51 @@
+{% macro badge(t) %}
+  <span class="text-xs font-semibold rounded-full px-2.5 py-1 {{ {'sell':'bg-moss text-white','donate':'bg-clay text-white','exchange':'bg-sky text-white'}[t] }}">
+    {{ {'sell':'For sale','donate':'Free · Donation','exchange':'Exchange'}[t] }}
+  </span>
+{% endmacro %}
+
+
+{% macro card(p) %}
+  <article class="group bg-white rounded-2xl border border-ink/10 overflow-hidden
+                flex flex-col transition duration-300
+                hover:-translate-y-1 hover:shadow-xl">
+
+   <a href="{{ url_for('product', pid=p.id) }}" class="h-40 overflow-hidden bg-mint grid place-items-center text-6xl">
+  {% if p.image %}
+    <img src="{{ url_for('static', filename='uploads/'+p.image) }}" class="h-40 w-full object-contain p-3 transition duration-500 group-hover:scale-105" alt="{{ p.title }}">
+  {% else %}
+        <span aria-hidden="true">{{ ICONS.get(p.category, '🔌') }}</span>
+      {% endif %}
+    </a>
+
+    <div class="p-4 flex flex-col gap-2 flex-1">
+
+      <div class="flex items-center justify-between">
+        {{ badge(p.listing_type) }}
+        <form method="post" action="{{ url_for('favorite', pid=p.id) }}">
+          <input type="hidden" name="_csrf" value="{{ csrf }}">
+          <button aria-label="Save" class="text-clay">
+            <i class="fa-regular fa-heart"></i>
+          </button>
+        </form>
+      </div>
+
+      <h3 class="font-display font-bold text-lg leading-snug">{{ p.title }}</h3>
+
+      <p class="font-semibold">
+        {% if p.listing_type=='sell' %}
+          ₹{{ '{:,}'.format(p.price) }}
+        {% elif p.listing_type=='donate' %}
+          Free
+        {% else %}
+          Swap
+        {% endif %}
+      </p>
+
+      <p class="text-sm text-ink/70">{{ p.condition }} · 📍 {{ p.location }} · {{ p.created_at[:10] }}</p>
+
+      <a href="{{ url_for('product', pid=p.id) }}" class="mt-auto text-sm font-semibold text-moss hover:underline">View details</a>
+
+    </div>
+  </article>
+{% endmacro %}

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Home · EcoConnect{% endblock %}</title>
+
+  {# ---------- Fonts & main stylesheet ---------- #}
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Figtree:wght@400;500;600&display=swap"
+        rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+  {# ---------- Styles for nav extras (auth area, bell, dropdown, flash) ---------- #}
+  <style>
+    /* Auth area */
+    .auth {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Notification bell + unread badge */
+    .bell {
+      position: relative;
+      padding: 8px 10px;
+      border-radius: 40px;
+    }
+
+    .bell em {
+      position: absolute;
+      top: 0;
+      right: 0;
+      background: #e5484d;
+      color: #fff;
+      font: 700 .7rem Figtree;
+      font-style: normal;
+      min-width: 18px;
+      height: 18px;
+      border-radius: 9px;
+      display: grid;
+      place-items: center;
+      animation: bob 2s infinite;
+    }
+
+    /* User dropdown */
+    .me {
+      position: relative;
+    }
+
+    .me > span {
+      display: inline-block;
+      padding: 10px 18px;
+      border-radius: 40px;
+      background: var(--bg);
+      font-weight: 600;
+    }
+
+    .menu {
+      position: absolute;
+      right: 0;
+      top: 100%;
+      padding-top: 12px;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(12px) scale(.96);
+      transition: .3s cubic-bezier(.2, 1.2, .3, 1);
+    }
+
+    .me:hover .menu {
+      opacity: 1;
+      visibility: visible;
+      transform: none;
+    }
+
+    .menu div {
+      background: #fff;
+      border-radius: 20px;
+      padding: 8px;
+      min-width: 210px;
+      box-shadow: 0 20px 40px rgba(15, 42, 36, .18);
+    }
+
+    .menu a {
+      display: block;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-weight: 500;
+      transition: background .2s, transform .2s;
+    }
+
+    .menu a:hover {
+      background: var(--sun);
+      transform: translateX(4px);
+    }
+
+    /* Flash messages: drop in, then fade out after 5s */
+    .flash {
+      position: fixed;
+      top: 84px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 60;
+      display: grid;
+      gap: 8px;
+    }
+
+    .flash p {
+      background: var(--ink);
+      color: #fff;
+      padding: 12px 22px;
+      border-radius: 40px;
+      animation: drop .5s cubic-bezier(.2, 1.4, .3, 1),
+                 gone .5s 5s forwards;
+    }
+
+    @keyframes drop {
+      from { transform: translateY(-60px); opacity: 0; }
+    }
+
+    @keyframes gone {
+      to { opacity: 0; transform: translateY(-30px); }
+    }
+
+    @media (max-width: 760px) {
+      .me > span,
+      .auth .hide-s {
+        display: none;
+      }
+    }
+  </style>
+
+  {% block head %}{% endblock %}
+</head>
+
+<body>
+
+  {# ---------- Effect layers used by main.js ---------- #}
+  <div id="bar"></div>
+  <div id="dot"></div>
+  <div id="ring"></div>
+  <canvas id="trail"></canvas>
+  <div id="wipe">♻️ EcoConnect</div>
+
+
+  {# ================= NAVBAR ================= #}
+  <nav id="nav">
+
+    <a class="logo" href="/"><i>♻️</i> EcoConnect</a>
+
+    <div class="links" id="links">
+      <span id="pill"></span>
+      <a href="/market">Marketplace</a>
+      <a href="/recycle">Recycle</a>
+      <a href="/centers">Collection centers</a>
+    </div>
+
+    <div class="auth">
+      {% if user %}
+
+        <a class="btn hide-s" data-mag href="/post">Post an item</a>
+
+        <a class="bell" href="/notifications">
+          🔔{% if unread %}<em>{{ unread }}</em>{% endif %}
+        </a>
+
+        <div class="me">
+          <span>Hi, {{ user.name.split()[0] }} 👋</span>
+
+          <div class="menu">
+            <div>
+              <a href="/dashboard">My listings &amp; requests</a>
+              <a href="/favorites">Favorites</a>
+              <a href="/notifications">Notifications</a>
+              <a href="/logout">Log out</a>
+            </div>
+          </div>
+        </div>
+
+      {% else %}
+
+        <a class="btn alt" data-mag href="/login">Log in</a>
+        <a class="btn hide-s" data-mag href="/signup">Sign up</a>
+
+      {% endif %}
+    </div>
+
+  </nav>
+
+
+  {# ================= FLASH MESSAGES ================= #}
+  {% with msgs = get_flashed_messages(with_categories=true) %}
+    {% if msgs %}
+      <div class="flash">
+        {% for c, m in msgs %}
+          <p>{{ m }}</p>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+
+  {# ================= PAGE CONTENT ================= #}
+  {% block content %}{% endblock %}
+
+
+  {# ================= FOOTER ================= #}
+  <footer>
+    <div class="logo">♻️ EcoConnect</div>
+
+    <p style="margin: 8px 0 22px">Reuse Before You Recycle.</p>
+
+    <a href="/market">Marketplace</a>
+    <a href="/recycle">Recycle</a>
+    <a href="/centers">Collection centers</a>
+
+    <p style="margin-top: 28px; opacity: .7">
+      Our mission: give every device a second life. Reuse first, recycle responsibly.
+    </p>
+  </footer>
+
+
+  {# ================= SCRIPTS ================= #}
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+</body>
+</html>

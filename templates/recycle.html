@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}Recycle your e-waste{% endblock %}
+
+{% block content %}
+  <div class="max-w-4xl mx-auto px-4 py-10 space-y-14">
+
+    <header>
+      <h1 class="font-display text-4xl font-extrabold">♻️ Recycle your e-waste</h1>
+      <p class="mt-3 text-lg text-ink/75">Reuse Before You Recycle. If a product cannot be reused or repaired, send it to an appropriate recycling facility. Never bin it or burn it.</p>
+    </header>
+
+    <!-- Decision helper -->
+    <section>
+      <h2 class="font-display text-2xl font-bold">What should I do with my device?</h2>
+      <div id="dq" class="mt-4 bg-white border border-ink/10 rounded-2xl p-6">
+        <p id="dq-q" class="font-semibold text-lg">Is the product working?</p>
+        <div class="mt-4 flex gap-3">
+          <button id="yes" class="bg-moss text-white rounded-full px-6 py-2 font-semibold">Yes</button>
+          <button id="no" class="border-2 border-moss text-moss rounded-full px-6 py-2 font-semibold">No</button>
+          <button id="reset" class="text-sm underline ml-auto">Start over</button>
+        </div>
+        <p id="dq-r" class="mt-4 hidden rounded-xl bg-leaf p-4 font-semibold"></p>
+      </div>
+    </section>
+
+    <!-- Calculator -->
+    <section>
+      <h2 class="font-display text-2xl font-bold">E-waste calculator</h2>
+      <p class="text-sm text-ink/70">Rough estimates, not official measurements.</p>
+      <div class="mt-4 bg-white border border-ink/10 rounded-2xl p-6 grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm" id="calc">
+        {% for n,w in [('Mobile phones',0.18),('Laptops',2.5),('Desktops',9),('Monitors',5),('TVs',12),('Printers',6),('Batteries',0.05),('Chargers',0.1)] %}
+          <label>{{ n }}<input type="number" min="0" value="0" data-w="{{ w }}" class="w-full border rounded-lg px-2 py-1 mt-1"></label>
+        {% endfor %}
+      </div>
+      <p class="mt-4 font-display text-2xl font-bold">Estimated e-waste: <span id="kg">0</span> kg</p>
+      <p class="text-sm">Consider repairing, donating, reusing, or responsibly recycling these items.</p>
+    </section>
+
+    <!-- Pickup request -->
+    <section id="pickup">
+      <h2 class="font-display text-2xl font-bold">Request an e-waste pickup</h2>
+      {% if user %}
+        <form method="post" action="{{ url_for('pickup') }}" class="mt-4 bg-white border border-ink/10 rounded-2xl p-6 grid sm:grid-cols-2 gap-3 text-sm">
+          <input type="hidden" name="_csrf" value="{{ csrf }}">
+
+          <select name="category" aria-label="Category" class="border rounded-lg px-3 py-2">
+            {% for c in ['Phones','Batteries','Laptops','Computers','TVs','Printers','Chargers','Cables','Other electronics'] %}
+              <option>{{ c }}</option>
+            {% endfor %}
+          </select>
+          <input name="quantity" placeholder="Approximate quantity" aria-label="Quantity" class="border rounded-lg px-3 py-2">
+
+          <input name="phone" inputmode="numeric" placeholder="Mobile" aria-label="Mobile" required class="border rounded-lg px-3 py-2">
+          <input name="pin" placeholder="PIN code" aria-label="PIN" class="border rounded-lg px-3 py-2">
+
+          <input name="address" placeholder="Address" aria-label="Address" required class="sm:col-span-2 border rounded-lg px-3 py-2">
+          <input name="city" placeholder="City" aria-label="City" class="border rounded-lg px-3 py-2">
+
+          <input name="date" type="date" aria-label="Pickup date" class="border rounded-lg px-3 py-2">
+          <select name="time" aria-label="Pickup time" class="border rounded-lg px-3 py-2">
+            <option>Morning</option>
+            <option>Afternoon</option>
+            <option>Evening</option>
+          </select>
+
+          <textarea name="notes" placeholder="Additional notes" class="sm:col-span-2 border rounded-lg px-3 py-2"></textarea>
+
+          <button class="sm:col-span-2 bg-moss text-white rounded-full py-3 font-semibold hover:bg-ink">Request pickup</button>
+        </form>
+      {% else %}
+        <p class="mt-4"><a class="text-moss underline font-semibold" href="{{ url_for('login', next='/recycle') }}">Log in</a> to request a pickup, or <a class="text-moss underline" href="{{ url_for('centers') }}">find a drop-off center</a>.</p>
+      {% endif %}
+    </section>
+
+    <!-- Do / Don't -->
+    <section class="grid sm:grid-cols-2 gap-4 text-sm">
+      <div class="bg-mint rounded-2xl p-5">
+        <b>Do</b><br>✅ Repair devices ✅ Donate working electronics ✅ Use authorised recyclers ✅ Erase personal data first
+      </div>
+      <div class="bg-white border border-ink/10 rounded-2xl p-5">
+        <b>Don't</b><br>❌ Put electronics in normal garbage ❌ Burn components ❌ Dump e-waste in the open ❌ Puncture or crush batteries
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    let step = 0;
+    const r = document.getElementById('dq-r'),
+          qq = document.getElementById('dq-q');
+
+    const flow = {
+      0: ['Is the product working?', 1, 2],
+      1: ['Can it be reused by someone else?', 'Reuse: list it on the marketplace to sell, donate or exchange.', 'Repair it first, then reuse it.'],
+      2: ['Can it be repaired?', 'Repair it, then reuse it.', 'Recycle it: request a pickup below.']
+    };
+
+    function go(a) {
+      const n = flow[step][a ? 1 : 2];
+      if (typeof n === 'number') {
+        step = n;
+        qq.textContent = flow[step][0]
+      } else {
+        r.textContent = n;
+        r.classList.remove('hidden')
+      }
+    }
+
+    yes.onclick = () => go(true);
+    no.onclick = () => go(false);
+    reset.onclick = () => {
+      step = 0;
+      qq.textContent = flow[0][0];
+      r.classList.add('hidden')
+    };
+
+    document.querySelectorAll('#calc input').forEach(i => i.oninput = () => {
+      kg.textContent = [...document.querySelectorAll('#calc input')].reduce((s, x) => s + (+x.value || 0) * x.dataset.w, 0).toFixed(1)
+    });
+  </script>
+{% endblock %}

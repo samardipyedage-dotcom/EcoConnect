@@ -1,0 +1,46 @@
+{# ---------- Badge macro (plain text, styled by .tag in the card) ---------- #}
+{% macro badge(t) %}
+  {{ {'sell': 'For sale',
+      'donate': 'Free · Donation',
+      'exchange': 'Exchange'}[t] }}
+{% endmacro %}
+
+
+{# ---------- Product card macro ---------- #}
+{% macro card(p) %}
+<a class="card rv" href="/product/{{ p.id }}">
+
+ {# Image: full URL, absolute path, or a file in static/uploads #}
+<div style="height:160px; background:#e3f1e7; border-radius:18px; display:flex; align-items:center; justify-content:center; overflow:hidden; margin-bottom:10px;">
+  {% if p.image %}
+    {% set src = p.image
+        if (p.image.startswith('http') or p.image.startswith('/'))
+        else url_for('static', filename='uploads/' ~ p.image) %}
+    <img src="{{ src }}"
+         alt="{{ p.title }}"
+         style="width:100%; height:100%; object-fit:contain; padding:10px; box-sizing:border-box;">
+  {% else %}
+    <span class="em">{{ ICONS.get(p.category, '🔌') }}</span>
+  {% endif %}
+</div>
+
+  <span class="tag">{{ badge(p.listing_type) }}</span>
+
+  <h3>{{ p.title }}</h3>
+
+  <div class="price">
+    {% if p.listing_type == 'sell' %}
+      ₹{{ '{:,}'.format(p.price) }}
+    {% elif p.listing_type == 'donate' %}
+      Free
+    {% else %}
+      Swap
+    {% endif %}
+  </div>
+
+  <div class="meta">
+    {{ p.condition }} · 📍 {{ p.location }} · {{ p.created_at[:10] }}
+  </div>
+
+</a>
+{% endmacro %}

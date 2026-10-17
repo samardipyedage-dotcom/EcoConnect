@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% from "_card.html" import badge with context %}
+
+{% block title %}{{ p.title }}{% endblock %}
+
+{% block content %}
+  <div class="max-w-6xl mx-auto px-4 py-10 grid lg:grid-cols-3 gap-8">
+
+    <!-- Main column -->
+    <div class="lg:col-span-2">
+
+      <div class="h-72 sm:h-96 bg-mint rounded-2xl grid place-items-center text-9xl overflow-hidden">
+        {% if p.image %}
+          <img src="{{ url_for('static', filename='uploads/'+p.image) }}" class="h-full w-full object-cover" alt="{{ p.title }}">
+        {% else %}
+          <span aria-hidden="true">{{ ICONS.get(p.category,'🔌') }}</span>
+        {% endif %}
+      </div>
+
+      <div class="mt-6 flex items-center gap-3">
+        {{ badge(p.listing_type) }}
+        <span class="text-sm text-ink/70">Posted {{ p.created_at[:10] }} · {{ p.status|capitalize }}</span>
+      </div>
+
+      <h1 class="font-display text-3xl font-extrabold mt-2">{{ p.title }}</h1>
+
+      <p class="text-2xl font-bold mt-1">
+        {% if p.listing_type=='sell' %}
+          ₹{{ '{:,}'.format(p.price) }}
+        {% elif p.listing_type=='donate' %}
+          🎁 Free / Donation
+        {% else %}
+          🔄 Exchange for: {{ p.exchange_for or 'open to offers' }}
+        {% endif %}
+      </p>
+
+      <dl class="mt-5 grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
+        {% for k,v in [('Condition',p.condition),('Brand',p.brand),('Model',p.model),('Age',p.age),('Location',p.location),('Category',p.category)] %}
+          <div>
+            <dt class="text-ink/60">{{ k }}</dt>
+            <dd class="font-semibold">{{ v or '-' }}</dd>
+          </div>
+        {% endfor %}
+      </dl>
+
+      <p class="mt-5 leading-relaxed max-w-prose">{{ p.description }}</p>
+
+      <p class="mt-4 text-sm bg-mint rounded-xl p-3">Inspect the item before handing over anything, and remove personal data from devices before they change hands.</p>
+
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="space-y-5">
+
+      <!-- Seller -->
+      <div class="bg-white border border-ink/10 rounded-2xl p-5">
+        <p class="font-display font-bold text-lg">{{ p.seller_name }}</p>
+        <p class="text-sm text-ink/70">📍 {{ p.seller_city }} · Member since {{ p.seller_since[:4] }} · {{ listings }} listing{{ 's' if listings!=1 }}</p>
+      </div>
+
+      <!-- Apply for product -->
+      {% if p.status=='active' and user and user.id!=p.seller_id or not user %}
+        <details class="bg-white border border-ink/10 rounded-2xl p-5" {{ 'open' if request.args.apply }}>
+          <summary class="cursor-pointer bg-moss text-white rounded-full text-center py-3 font-semibold list-none">I'm interested · Apply for product</summary>
+
+          <form method="post" action="{{ url_for('interest', pid=p.id) }}" class="mt-4 space-y-3 text-sm">
+            <input type="hidden" name="_csrf" value="{{ csrf }}">
+
+            <label class="block">Purpose
+              <select name="purpose" class="w-full border rounded-lg px-3 py-2 mt-1">
+                {% for x in ['Personal use','Education','Work','Repair','Donation','Other'] %}
+                  <option>{{ x }}</option>
+                {% endfor %}
+              </select>
+            </label>
+
+            <label class="block">Contact preference
+              <select name="contact_pref" class="w-full border rounded-lg px-3 py-2 mt-1">
+                <option>Platform messages</option>
+                <option>Phone</option>
+                <option>Email</option>
+              </select>
+            </label>
+
+            <label class="block">Message
+              <textarea name="message" required rows="3" placeholder="I need this laptop for my college studies." class="w-full border rounded-lg px-3 py-2 mt-1"></textarea>
+            </label>
+
+            <button class="w-full bg-ink text-white rounded-full py-2.5 font-semibold">Send application</button>
+          </form>
+        </details>
+      {% endif %}
+
+      <!-- Save -->
+      <form method="post" action="{{ url_for('favorite', pid=p.id) }}">
+        <input type="hidden" name="_csrf" value="{{ csrf }}">
+        <button class="w-full border-2 border-clay text-clay rounded-full py-2.5 font-semibold hover:bg-clay hover:text-white">{{ '❤️ Saved' if saved else '🤍 Save' }}</button>
+      </form>
+
+      <!-- Report -->
+      <details class="text-sm">
+        <summary class="cursor-pointer text-ink/70">🚩 Report this listing</summary>
+
+        <form method="post" action="{{ url_for('report', pid=p.id) }}" class="mt-3 space-y-2">
+          <input type="hidden" name="_csrf" value="{{ csrf }}">
+
+          <select name="reason" class="w-full border rounded-lg px-3 py-2">
+            {% for r in ['Fake listing','Incorrect information','Spam','Suspicious activity','Prohibited item','Other'] %}
+              <option>{{ r }}</option>
+            {% endfor %}
+          </select>
+
+          <textarea name="description" rows="2" placeholder="What looks wrong?" class="w-full border rounded-lg px-3 py-2"></textarea>
+
+          <button class="border rounded-full px-4 py-2">Send report</button>
+        </form>
+      </details>
+
+    </aside>
+  </div>
+{% endblock %}

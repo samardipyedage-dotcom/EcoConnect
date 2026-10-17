@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin · EcoConnect</title>
+
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      margin: 0;
+      background: #f1f5f2;
+      color: #222;
+    }
+
+    header {
+      background: #1f6f43;
+      color: #fff;
+      padding: 14px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    main {
+      padding: 24px;
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    h2 {
+      color: #1f6f43;
+    }
+
+    /* Scrollable table container */
+    .wrap {
+      overflow-x: auto;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 1px 6px #0001;
+      margin-bottom: 28px;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: 14px;
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+      vertical-align: top;
+    }
+
+    th {
+      background: #e6f0ea;
+    }
+
+    form {
+      display: inline;
+    }
+
+    /* Buttons */
+    button {
+      padding: 5px 10px;
+      border: 0;
+      border-radius: 5px;
+      cursor: pointer;
+      color: #fff;
+      background: #1f6f43;
+      margin: 2px 0;
+    }
+
+    button.no  { background: #b42318; }   /* reject */
+    button.mid { background: #475467; }   /* progress / neutral */
+
+    /* Status pill and flash message */
+    .tag {
+      padding: 2px 8px;
+      border-radius: 99px;
+      font-size: 12px;
+      background: #eee;
+    }
+
+    .ok {
+      background: #d1fadf;
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 14px;
+    }
+  </style>
+</head>
+
+<body>
+
+  {# ================= HEADER ================= #}
+  <header>
+    <b>EcoConnect Admin</b>
+
+    <form method="post" action="{{ url_for('logout') }}">
+      <input type="hidden" name="_csrf" value="{{ csrf }}">
+      <button class="mid">Log out</button>
+    </form>
+  </header>
+
+
+  <main>
+
+    {# ================= FLASH MESSAGES ================= #}
+    {% for cat, msg in get_flashed_messages(with_categories=true) %}
+      <div class="ok">{{ msg }}</div>
+    {% endfor %}
+
+
+    {# ================= PICKUP REQUESTS ================= #}
+    <h2>
+      Pickup requests
+      ({{ pickups|selectattr('status', 'equalto', 'Pending')|list|length }} pending)
+    </h2>
+
+    <div class="wrap">
+      <table>
+
+        <tr>
+          <th>ID</th>
+          <th>User</th>
+          <th>Items</th>
+          <th>Address</th>
+          <th>Phone</th>
+          <th>Date / time</th>
+          <th>Notes</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+
+        {% for r in pickups %}
+          <tr>
+            <td>EW-{{ 10240 + r.id }}</td>
+            <td>{{ r.user_name }}</td>
+            <td>{{ r.category }}<br>{{ r.quantity }}</td>
+            <td>{{ r.address }}<br>{{ r.city }} {{ r.pin }}</td>
+            <td>{{ r.phone }}</td>
+            <td>{{ r.date }} {{ r.time }}</td>
+            <td>{{ r.notes }}</td>
+            <td><span class="tag">{{ r.status }}</span></td>
+
+            <td>
+              {# Helper that builds one action button form #}
+              {% macro btn(a, label, cls='') %}
+                <form method="post"
+                      action="{{ url_for('admin_pickup', rid=r.id, action=a) }}">
+                  <input type="hidden" name="_csrf" value="{{ csrf }}">
+                  <button class="{{ cls }}">{{ label }}</button>
+                </form>
+              {% endmacro %}
+
+              {% if r.status == 'Pending' %}
+                {{ btn('approve', 'Approve') }}
+                {{ btn('reject', 'Reject', 'no') }}
+              {% elif r.status == 'Assigned' %}
+                {{ btn('picked', 'Mark picked up', 'mid') }}
+              {% elif r.status == 'Picked Up' %}
+                {{ btn('recycled', 'Mark recycled', 'mid') }}
+              {% endif %}
+            </td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="9">No pickup requests yet.</td>
+          </tr>
+        {% endfor %}
+
+      </table>
+    </div>
+
+
+    {# ================= EXCHANGE / INTEREST REQUESTS ================= #}
+    <h2>Exchange and interest requests</h2>
+
+    <div class="wrap">
+      <table>
+
+        <tr>
+          <th>ID</th>
+          <th>Item</th>
+          <th>Type</th>
+          <th>Applicant</th>
+          <th>Owner</th>
+          <th>Message</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+
+        {% for i in exchanges %}
+          <tr>
+            <td>REQ-{{ 10000 + i.id }}</td>
+            <td>{{ i.title }}</td>
+            <td>{{ i.listing_type }}</td>
+            <td>{{ i.applicant }}</td>
+            <td>{{ i.seller }}</td>
+            <td>{{ i.message }}</td>
+            <td><span class="tag">{{ i.status }}</span></td>
+
+            <td>
+              {% if i.status == 'pending' %}
+                <form method="post"
+                      action="{{ url_for('admin_interest', iid=i.id, action='accept') }}">
+                  <input type="hidden" name="_csrf" value="{{ csrf }}">
+                  <button>Approve</button>
+                </form>
+
+                <form method="post"
+                      action="{{ url_for('admin_interest', iid=i.id, action='reject') }}">
+                  <input type="hidden" name="_csrf" value="{{ csrf }}">
+                  <button class="no">Reject</button>
+                </form>
+              {% endif %}
+            </td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="8">No requests yet.</td>
+          </tr>
+        {% endfor %}
+
+      </table>
+    </div>
+
+  </main>
+</body>
+</html>

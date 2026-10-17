@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Log in{% endblock %}
+
+{% block content %}
+  <div class="max-w-md mx-auto px-4 py-12 space-y-6">
+
+    <h1 class="font-display text-3xl font-extrabold">Welcome back</h1>
+
+    <!-- Google sign-in -->
+    <form method="post" action="{{ url_for('google_demo') }}">
+      <input type="hidden" name="_csrf" value="{{ csrf }}">
+      <button class="w-full flex items-center justify-center gap-3 bg-white border-2 border-ink/15 rounded-full py-3 font-semibold hover:border-moss">
+        <i class="fa-brands fa-google text-[#4285F4]"></i>Continue with Google
+      </button>
+      <p class="text-xs text-ink/60 mt-1 text-center">Demo sign-in. Real Google OAuth needs credentials (see README).</p>
+    </form>
+
+    <!-- Email login -->
+    <form method="post" class="bg-white border border-ink/10 rounded-2xl p-5 space-y-3">
+      <input type="hidden" name="_csrf" value="{{ csrf }}">
+      <h2 class="font-semibold">Log in with email</h2>
+      <input name="email" type="email" required placeholder="Email" aria-label="Email" class="w-full border rounded-lg px-3 py-2">
+      <input name="password" type="password" required placeholder="Password" aria-label="Password" class="w-full border rounded-lg px-3 py-2">
+      <button class="w-full bg-moss text-white rounded-full py-2.5 font-semibold hover:bg-ink">Log in</button>
+      <p class="text-sm text-ink/70">Demo: demo@ecoconnect.test / demo1234</p>
+    </form>
+
+    <!-- Mobile OTP login -->
+    <form method="post" action="{{ url_for('otp') }}" class="bg-white border border-ink/10 rounded-2xl p-5 space-y-3">
+      <input type="hidden" name="_csrf" value="{{ csrf }}">
+      <h2 class="font-semibold">Log in with mobile number</h2>
+      <input name="phone" inputmode="numeric" maxlength="10" placeholder="10-digit mobile number" aria-label="Mobile number" class="w-full border rounded-lg px-3 py-2">
+      <input name="code" inputmode="numeric" maxlength="6" placeholder="OTP" aria-label="OTP" class="w-full border rounded-lg px-3 py-2">
+      <div class="flex gap-2">
+        <button name="action" value="send" class="flex-1 border-2 border-moss text-moss rounded-full py-2 font-semibold">Send OTP</button>
+        <button name="action" value="verify" class="flex-1 bg-moss text-white rounded-full py-2 font-semibold">Verify OTP</button>
+      </div>
+    </form>
+
+    <p class="text-sm text-center">New here? <a class="text-moss font-semibold underline" href="{{ url_for('signup') }}">Create account</a></p>
+
+  </div>
+{% endblock %}

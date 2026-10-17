@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Collection centers{% endblock %}
+
+{% block head %}
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+{% endblock %}
+
+{% block content %}
+  <div class="max-w-6xl mx-auto px-4 py-10">
+
+    <h1 class="font-display text-3xl font-extrabold">Find an e-waste collection center</h1>
+
+    <form class="mt-5 flex gap-2">
+      <input name="q" value="{{ request.args.q or '' }}" placeholder="City, area or PIN code" aria-label="Search centers" class="flex-1 border rounded-full px-4 py-2">
+      <button class="bg-moss text-white rounded-full px-6 font-semibold">Search</button>
+    </form>
+
+    <div class="mt-6 grid lg:grid-cols-2 gap-6">
+
+      <div class="space-y-3">
+        {% for c in rows %}
+          <article class="bg-white border border-ink/10 rounded-2xl p-4">
+            <h2 class="font-display font-bold text-lg">{{ c.name }}</h2>
+            <p class="text-sm">
+              {{ c.address }}, {{ c.city }} {{ c.pin }}<br>
+              📞 {{ c.phone }} · 🕒 {{ c.opening_hours }}<br>
+              Accepts: {{ c.accepts }}
+            </p>
+            <a target="_blank" rel="noopener" class="text-moss font-semibold text-sm underline" href="https://www.openstreetmap.org/directions?to={{ c.latitude }},{{ c.longitude }}">Get directions</a>
+          </article>
+        {% else %}
+          <p>No centers found. Try a nearby city.</p>
+        {% endfor %}
+      </div>
+
+      <div id="map" class="h-96 lg:h-[32rem] rounded-2xl border border-ink/10"></div>
+
+    </div>
+  </div>
+
+  <script>
+    const m = L.map('map').setView([18.55, 73.85], 9);
+
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap'
+    }).addTo(m);
+
+    {% for c in rows %}
+      L.marker([{{ c.latitude }}, {{ c.longitude }}]).addTo(m).bindPopup({{ c.name|tojson }});
+    {% endfor %}
+  </script>
+{% endblock %}

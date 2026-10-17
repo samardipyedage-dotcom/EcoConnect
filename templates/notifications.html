@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Notifications{% endblock %}
+
+{% block content %}
+  <div class="max-w-2xl mx-auto px-4 py-10">
+
+    <h1 class="font-display text-3xl font-extrabold">Notifications</h1>
+
+    <ul class="mt-6 space-y-2">
+      {% for n in rows %}
+        <li class="bg-white border border-ink/10 rounded-xl p-4">
+          🔔 {{ n.message }}
+          <span class="text-xs text-ink/60 block">{{ n.created_at }}</span>
+        </li>
+      {% else %}
+        <li>Nothing new.</li>
+      {% endfor %}
+    </ul>
+
+  </div>
+{% endblock %}

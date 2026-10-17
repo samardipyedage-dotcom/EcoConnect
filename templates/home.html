@@ -1,0 +1,55 @@
+{% extends "base_new.html" %}
+{% from "_card_new.html" import card with context %}
+{% block content %}
+<header class="hero" id="hero">
+  <div class="blob" style="background:#8fd6a9;top:8%;left:-8%" data-s="30"></div>
+  <div class="blob" style="background:#ffd978;bottom:0;right:-8%" data-s="-40"></div>
+  <span class="float" style="top:20%;left:9%" data-s="40"><b>📱</b></span>
+  <span class="float" style="top:62%;left:14%" data-s="-30"><b>🔋</b></span>
+  <span class="float" style="top:18%;right:11%" data-s="-50"><b>💻</b></span>
+  <span class="float" style="top:64%;right:10%" data-s="35"><b>🎧</b></span>
+  <div>
+    <h1 id="title">Give your electronics a second life.</h1>
+    <p>Sell, donate, exchange, repair, or responsibly recycle your electronic products. Reuse before you recycle.</p>
+    <div class="cta"><a class="btn" data-mag href="/market">Explore marketplace</a><a class="btn alt" data-mag href="/post">Post an item</a></div>
+  </div>
+</header>
+
+<div class="marq"><div id="mq"></div></div>
+
+<section>
+  <h2 class="rv">Reuse first. Repair next. Recycle last.</h2>
+  <p class="sub rv">Pick a path to see what it means for your device.</p>
+  <div class="tabs rv" id="tabs"><span id="tabpill"></span>
+    <button class="on">Reuse</button><button>Repair</button><button>Recycle</button></div>
+  <div class="panel on"><div class="big">📱💻</div><div><h3>List it to sell, donate or exchange.</h3><p>Someone nearby needs what you no longer use. Post it, and neighbours can tap I'm Interested.</p><br><a class="btn" href="/post" data-mag>Post an item</a></div></div>
+  <div class="panel"><div class="big">🔧🔌</div><div><h3>Fixable? Give it a longer life.</h3><p>Broken but repairable items can be listed as Needs Repair, so a handy neighbour can bring them back.</p><br><a class="btn" href="/market" data-mag>Find repairable items</a></div></div>
+  <div class="panel"><div class="big">♻️🔋</div><div><h3>Unusable? Send it to a proper facility.</h3><p>Book a pickup or find a drop-off centre so batteries and circuit boards never reach a landfill.</p><br><a class="btn" href="/recycle" data-mag>Book a pickup</a></div></div>
+</section>
+
+<section>
+  <h2 class="rv">How EcoConnect works</h2><p class="sub rv">Six steps from clutter to a cleaner community.</p>
+  <div class="steps" id="steps">
+    <div class="step rv" data-n="1"><h3>List your product</h3><p>Add photos and details in two minutes.</p></div>
+    <div class="step rv" data-n="2"><h3>Find someone who needs it</h3><p>Neighbours browse and tap I'm Interested.</p></div>
+    <div class="step rv" data-n="3"><h3>Sell, donate or exchange</h3><p>Accept the request that fits best.</p></div>
+    <div class="step rv" data-n="4"><h3>Repair and reuse</h3><p>Broken but fixable? Repair it first.</p></div>
+    <div class="step rv" data-n="5"><h3>Recycle unusable items</h3><p>Book a pickup or find a drop-off centre.</p></div>
+    <div class="step rv" data-n="6"><h3>Build a cleaner community</h3><p>Every device kept in use means less waste.</p></div>
+  </div>
+</section>
+
+<section style="display:none"><div class="stats">
+  <div class="stat rv"><b data-c="{{ stats.members }}">0</b>Community members</div>
+  <div class="stat rv" style="--d:.1s"><b data-c="{{ stats.reused }}">0</b>Products reused</div>
+  <div class="stat rv" style="--d:.2s"><b data-c="{{ stats.pickups }}">0</b>Pickups requested</div>
+  <div class="stat rv" style="--d:.3s"><b data-c="{{ stats.centers }}">0</b>Collection centers</div>
+</div></section>
+
+<section>
+  <h2 class="rv">Fresh in the marketplace</h2><p class="sub rv"><a href="/market" style="text-decoration:underline">See all listings</a></p>
+  <div class="grid" id="grid">
+    {% for p in featured %}{{ card(p) }}{% endfor %}
+  </div>
+</section>
+{% endblock %}

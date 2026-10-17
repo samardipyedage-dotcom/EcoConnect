@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% from "_card.html" import card with context %}
+
+{% block title %}My dashboard{% endblock %}
+
+{% block content %}
+  <div class="max-w-6xl mx-auto px-4 py-10 space-y-12">
+
+    <h1 class="font-display text-3xl font-extrabold">Hi, {{ user.name }}</h1>
+
+    <!-- My listings -->
+    <section id="listings">
+      <h2 class="font-display text-2xl font-bold">My listings</h2>
+      <div class="mt-4 grid gap-3">
+        {% for p in mine %}
+          <div class="bg-white border border-ink/10 rounded-xl p-4 flex flex-wrap items-center gap-3 justify-between">
+            <a href="{{ url_for('product', pid=p.id) }}" class="font-semibold">{{ ICONS.get(p.category) }} {{ p.title }}</a>
+            <span class="text-sm bg-mint rounded-full px-3 py-1">{{ p.status|capitalize }}</span>
+
+            <form method="post" action="{{ url_for('set_status', pid=p.id) }}" class="flex gap-2 text-sm">
+              <input type="hidden" name="_csrf" value="{{ csrf }}">
+              <button name="status" value="{{ {'sell':'sold','donate':'donated','exchange':'exchanged'}[p.listing_type] }}" class="border rounded-full px-3 py-1">Mark {{ {'sell':'sold','donate':'donated','exchange':'exchanged'}[p.listing_type] }}</button>
+              <button name="status" value="active" class="border rounded-full px-3 py-1">Reactivate</button>
+              <button name="status" value="deleted" class="border border-red-300 text-red-700 rounded-full px-3 py-1" onclick="return confirm('Delete this listing?')">Delete</button>
+            </form>
+          </div>
+        {% else %}
+          <p>You have no listings yet. <a class="text-moss underline" href="{{ url_for('post') }}">Post your first item</a>.</p>
+        {% endfor %}
+      </div>
+    </section>
+
+    <!-- Requests on my products -->
+    <section id="requests">
+      <h2 class="font-display text-2xl font-bold">Requests on my products</h2>
+      <div class="mt-4 overflow-x-auto bg-white border border-ink/10 rounded-xl">
+        <table class="w-full text-sm">
+          <thead class="text-left bg-mint">
+            <tr>
+              <th class="p-3">Product</th>
+              <th>User</th>
+              <th>Purpose</th>
+              <th>Message</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in incoming %}
+              <tr class="border-t">
+                <td class="p-3">{{ r.title }}</td>
+                <td>{{ r.applicant }} ({{ r.applicant_city }})</td>
+                <td>{{ r.purpose }}</td>
+                <td class="max-w-xs">{{ r.message }}</td>
+                <td>{{ r.status|capitalize }}</td>
+                <td class="p-3">
+                  {% if r.status=='pending' %}
+                    <form method="post" class="flex gap-2">
+                      <input type="hidden" name="_csrf" value="{{ csrf }}">
+                      <button formaction="{{ url_for('decide', iid=r.id, action='accept') }}" class="bg-moss text-white rounded-full px-3 py-1">Accept</button>
+                      <button formaction="{{ url_for('decide', iid=r.id, action='reject') }}" class="border rounded-full px-3 py-1">Reject</button>
+                    </form>
+                  {% endif %}
+                </td>
+              </tr>
+            {% else %}
+              <tr>
+                <td class="p-4" colspan="6">No requests yet.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- My applications -->
+    <section id="applications">
+      <h2 class="font-display text-2xl font-bold">My applications</h2>
+      <ul class="mt-4 grid gap-2 text-sm">
+        {% for s in sent %}
+          <li class="bg-white border border-ink/10 rounded-xl p-3">REQ-{{ 10000+s.id }} · {{ s.title }} · <b>{{ s.status|capitalize }}</b></li>
+        {% else %}
+          <li>No applications yet.</li>
+        {% endfor %}
+      </ul>
+    </section>
+
+    <!-- Favorites -->
+    <section id="favorites">
+      <h2 class="font-display text-2xl font-bold">Favorites</h2>
+      <div class="mt-4 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        {% for p in favs %}
+          {{ card(p) }}
+        {% else %}
+          <p>Tap the heart on any listing to save it here.</p>
+        {% endfor %}
+      </div>
+    </section>
+
+    <!-- E-waste pickups -->
+    <section id="pickups">
+      <h2 class="font-display text-2xl font-bold">E-waste pickups</h2>
+      <ul class="mt-4 grid gap-2 text-sm">
+        {% for k in pickups %}
+          <li class="bg-white border border-ink/10 rounded-xl p-3">EW-{{ 10240+k.id }} · {{ k.category }} · {{ k.date }} · <b>{{ k.status }}</b></li>
+        {% else %}
+          <li>No pickups yet.</li>
+        {% endfor %}
+      </ul>
+    </section>
+
+  </div>
+{% endblock %}
